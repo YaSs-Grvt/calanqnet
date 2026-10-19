@@ -1,0 +1,80 @@
+!==================================================================
+! CALANQ'NET - Maquette Packet Tracer - DIG-WAN-01
+! Role : Routeur CE MPLS + acces Internet local de Digne (ISR4331)
+! Fichier genere depuis le plan d'adressage (source unique). Partie de Yacine Ben Omrane (Topics 7, 8 et 9, WAN, Internet et perimetre).
+! Copier-coller l'integralite du fichier dans le CLI de l'equipement.
+! Note PT : certaines lignes (ex. 'standby xxxx ipv6', 'storm-control') peuvent etre
+! refusees selon la version de Packet Tracer : ces refus sont sans incidence.
+!==================================================================
+enable
+configure terminal
+hostname DIG-WAN-01
+no ip domain-lookup
+ip domain-name iutrt.lan
+enable secret Ch@ngeMe-Lab!
+username admin privilege 15 secret Ch@ngeMe-Lab!
+service password-encryption
+banner motd #Acces reserve au personnel autorise - CALANQ'NET / IUT R&T Luminy. Toute connexion est journalisee.#
+ipv6 unicast-routing
+interface GigabitEthernet0/0/0
+ description Lien operateur MPLS (PE Digne)
+ ip address 10.255.4.2 255.255.255.252
+ ipv6 address 2001:db8:ffff:4ff::2/64
+ no shutdown
+exit
+interface GigabitEthernet0/0/1
+ description Vers DIG-CORE-01
+ ip address 10.4.254.1 255.255.255.252
+ ipv6 address 2001:db8:4:fe01::1/64
+ ipv6 ospf 1 area 0
+ ip nat inside
+ no shutdown
+exit
+interface GigabitEthernet0/0/2
+ description Acces Internet local RENATER
+ ip address 192.0.2.6 255.255.255.252
+ ipv6 address 2001:db8:ffff:5::2/64
+ ip nat outside
+ no shutdown
+exit
+interface Loopback0
+ ip address 10.4.255.7 255.255.255.255
+exit
+access-list 10 permit 10.4.0.0 0.0.255.255
+ip nat inside source list 10 interface GigabitEthernet0/0/2 overload
+ip route 0.0.0.0 0.0.0.0 192.0.2.5
+ip route 10.4.0.0 255.255.0.0 Null0
+ipv6 route ::/0 2001:db8:ffff:5::1
+ipv6 route 2001:db8:13::/48 2001:db8:ffff:4ff::1
+router bgp 65004
+ bgp router-id 10.4.255.7
+ neighbor 10.255.4.1 remote-as 64510
+ network 10.4.0.0 mask 255.255.0.0
+exit
+router ospf 1
+ router-id 10.4.255.7
+ network 10.4.254.0 0.0.0.3 area 0
+ redistribute bgp 65004 subnets
+ default-information originate
+exit
+ipv6 router ospf 1
+ router-id 10.4.255.7
+ redistribute static
+ default-information originate
+exit
+ip ssh version 2
+crypto key generate rsa general-keys modulus 2048
+line con 0
+ logging synchronous
+ exec-timeout 10 0
+line vty 0 15
+ login local
+ transport input ssh
+ exec-timeout 10 0
+exit
+ntp server 10.13.200.50
+logging host 10.13.200.50
+logging trap informational
+snmp-server community Cq-RO-Zabbix RO
+end
+write memory

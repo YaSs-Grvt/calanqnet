@@ -1,0 +1,7 @@
+Maquette GNS3 optionnelle du coeur MPLS operateur (L3VPN) - Partie de Yacine Ben Omrane (Topic 7)
+Images : Cisco IOSv 15.x (ou IOSvL2 pour les commutateurs) fournies par l'IUT.
+Topologie : LUM-WAN-01 (CE) - PE-MRS - P-CORE - PE-DIG - DIG-WAN-01 (CE)
+Liens operateur : PE-MRS Gi0/1 <-> P-CORE Gi0/1 : 10.255.0.0/30 ; P-CORE Gi0/2 <-> PE-DIG Gi0/1 : 10.255.0.4/30
+Liens PE-CE : PE-MRS Gi0/0 <-> LUM-WAN-01 : 10.255.13.0/30 ; PE-DIG Gi0/0 <-> DIG-WAN-01 : 10.255.4.0/30
+Les CE utilisent les memes configurations BGP que dans Packet Tracer (AS 65013 et AS 65004).
+Verifications : show mpls ldp neighbor / show bgp vpnv4 unicast all / show ip route vrf IUT-RT / ping vrf IUT-RT 10.4.254.2

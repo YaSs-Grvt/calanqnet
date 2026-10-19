@@ -1,0 +1,102 @@
+!==================================================================
+! CALANQ'NET - Maquette Packet Tracer - LUM-ACC-SS
+! Role : Acces - Sous-sol (baie R04 salle serveurs) (pile Catalyst 9300 en production / 2960-24TT en maquette)
+! Fichier genere depuis le plan d'adressage (source unique). Partie d'Oussama Madih (Topics 3 et 6, LAN et datacenter).
+! Copier-coller l'integralite du fichier dans le CLI de l'equipement.
+! Note PT : certaines lignes (ex. 'standby xxxx ipv6', 'storm-control') peuvent etre
+! refusees selon la version de Packet Tracer : ces refus sont sans incidence.
+!==================================================================
+enable
+configure terminal
+hostname LUM-ACC-SS
+no ip domain-lookup
+ip domain-name iutrt.lan
+enable secret Ch@ngeMe-Lab!
+username admin privilege 15 secret Ch@ngeMe-Lab!
+service password-encryption
+banner motd #Acces reserve au personnel autorise - CALANQ'NET / IUT R&T Luminy. Toute connexion est journalisee.#
+vtp mode transparent
+spanning-tree mode rapid-pvst
+vlan 40
+ name ETUDIANTS-FIL
+vlan 60
+ name VIDEOPROTECTION
+vlan 70
+ name GTB-ACCES
+vlan 99
+ name MGMT-RESEAU
+vlan 998
+ name NATIVE
+vlan 999
+ name PARKING
+interface GigabitEthernet0/1
+ description Uplink vers LUM-DIST-B1
+ switchport mode trunk
+ switchport trunk native vlan 998
+ switchport trunk allowed vlan 40,60,70,99
+ switchport nonegotiate
+ no shutdown
+exit
+interface GigabitEthernet0/2
+ description Uplink vers LUM-DIST-B2
+ switchport mode trunk
+ switchport trunk native vlan 998
+ switchport trunk allowed vlan 40,60,70,99
+ switchport nonegotiate
+ no shutdown
+exit
+interface FastEthernet0/1
+ description CAM-PARKING (IoT)
+ switchport mode access
+ switchport access vlan 60
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ no shutdown
+exit
+interface FastEthernet0/2
+ description LECTEUR-BADGE-DC (IoT)
+ switchport mode access
+ switchport access vlan 70
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ no shutdown
+exit
+interface FastEthernet0/3
+ description PC-CLUB-J03
+ switchport mode access
+ switchport access vlan 40
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ no shutdown
+exit
+interface range FastEthernet0/4 - 24
+ description Port inutilise (parking)
+ switchport mode access
+ switchport access vlan 999
+ shutdown
+exit
+interface Vlan1
+ shutdown
+exit
+interface Vlan99
+ description Administration
+ ip address 10.13.99.15 255.255.255.0
+ no shutdown
+exit
+ip default-gateway 10.13.99.1
+ip ssh version 2
+crypto key generate rsa general-keys modulus 2048
+line con 0
+ logging synchronous
+ exec-timeout 10 0
+line vty 0 15
+ login local
+ transport input ssh
+ exec-timeout 10 0
+exit
+ntp server 10.13.200.50
+logging host 10.13.200.50
+logging trap informational
+snmp-server community Cq-RO-Zabbix RO
+end
+write memory

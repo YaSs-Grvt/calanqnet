@@ -1,0 +1,80 @@
+!==================================================================
+! CALANQ'NET - Complement SECURITE - LUM-DIST-B1 - Partie de Yacine Ben Omrane
+! A coller APRES la configuration de base (Oussama Madih).
+! Filtrage inter-VLAN (ACL etendues nommees appliquees en entree des SVI)
+!==================================================================
+enable
+configure terminal
+aaa new-model
+radius-server host 10.13.200.20 key R@dius-Maquette
+aaa authentication login default group radius local
+line vty 0 15
+ login authentication default
+exit
+! VLAN 120 LOGEMENT : Internet uniquement (aucun acces au reseau interne sauf DNS/DHCP)
+ip access-list extended ACL-LOGEMENT-IN
+ permit udp any any eq bootps
+ permit udp 10.13.120.0 0.0.0.15 host 10.13.200.10 eq domain
+ deny ip 10.13.120.0 0.0.0.15 10.0.0.0 0.255.255.255
+ deny ip 10.13.120.0 0.0.0.15 172.16.0.0 0.15.255.255
+ deny ip 10.13.120.0 0.0.0.15 192.168.0.0 0.0.255.255
+ permit ip 10.13.120.0 0.0.0.15 any
+exit
+! VLAN 40 ETUDIANTS-FIL : services pedagogiques + Internet, pas d'acces aux VLANs du personnel
+ip access-list extended ACL-ETUDIANTS-IN
+ permit udp any any eq bootps
+ permit udp 10.13.40.0 0.0.0.255 host 10.13.200.10 eq domain
+ permit tcp 10.13.40.0 0.0.0.255 host 10.13.200.30 eq www
+ permit tcp 10.13.40.0 0.0.0.255 host 10.13.200.30 eq 443
+ deny ip 10.13.40.0 0.0.0.255 10.0.0.0 0.255.255.255
+ permit ip 10.13.40.0 0.0.0.255 any
+exit
+! VLAN 60 VIDEOPROTECTION : uniquement vers l'enregistreur (NVR) et NTP
+ip access-list extended ACL-VIDEO-IN
+ permit udp any any eq bootps
+ permit ip 10.13.60.0 0.0.0.255 host 10.13.200.90
+ permit udp 10.13.60.0 0.0.0.255 host 10.13.200.50 eq ntp
+ deny ip any any
+exit
+! VLAN 70 GTB-ACCES : uniquement vers les serveurs de supervision/GTB et NTP
+ip access-list extended ACL-GTB-IN
+ permit udp any any eq bootps
+ permit ip 10.13.70.0 0.0.0.255 10.13.200.0 0.0.0.255
+ deny ip any any
+exit
+! VLAN 32 LAB-RESEAUX : postes de TP isoles des VLANs administratifs
+ip access-list extended ACL-LAB-IN
+ permit udp any any eq bootps
+ permit udp 10.13.32.0 0.0.0.255 host 10.13.200.10 eq domain
+ permit ip 10.13.32.0 0.0.0.255 10.13.200.0 0.0.0.255
+ deny ip 10.13.32.0 0.0.0.255 10.13.10.0 0.0.0.255
+ deny ip 10.13.32.0 0.0.0.255 10.13.20.0 0.0.0.255
+ deny ip 10.13.32.0 0.0.0.255 10.13.99.0 0.0.0.255
+ permit ip 10.13.32.0 0.0.0.255 any
+exit
+! VLAN 99 MGMT : protege l'acces administration (seul le VLAN admin reseau / serveurs)
+ip access-list standard ACL-MGMT-VTY
+ permit 10.13.10.0 0.0.0.255
+ permit 10.13.200.0 0.0.0.255
+ deny any
+exit
+interface Vlan120
+ ip access-group ACL-LOGEMENT-IN in
+exit
+interface Vlan40
+ ip access-group ACL-ETUDIANTS-IN in
+exit
+interface Vlan60
+ ip access-group ACL-VIDEO-IN in
+exit
+interface Vlan70
+ ip access-group ACL-GTB-IN in
+exit
+interface Vlan32
+ ip access-group ACL-LAB-IN in
+exit
+line vty 0 15
+ access-class ACL-MGMT-VTY in
+exit
+end
+write memory

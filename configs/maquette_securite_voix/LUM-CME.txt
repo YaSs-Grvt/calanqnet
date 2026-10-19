@@ -1,0 +1,52 @@
+!==================================================================
+! CALANQ'NET - Maquette Packet Tracer - LUM-CME
+! Role : IPBX de maquette Cisco CME (FreePBX/Asterisk en production) - Partie de Yacine Ben Omrane
+! Fichier genere depuis le plan d'adressage (source unique). Partie de Yacine Ben Omrane (Topic 12, voix et video).
+! Copier-coller l'integralite du fichier dans le CLI de l'equipement.
+! Note PT : certaines lignes (ex. 'standby xxxx ipv6', 'storm-control') peuvent etre
+! refusees selon la version de Packet Tracer : ces refus sont sans incidence.
+!==================================================================
+enable
+configure terminal
+hostname LUM-CME
+no ip domain-lookup
+ip domain-name iutrt.lan
+enable secret Ch@ngeMe-Lab!
+username admin privilege 15 secret Ch@ngeMe-Lab!
+service password-encryption
+banner motd #Acces reserve au personnel autorise - CALANQ'NET / IUT R&T Luminy. Toute connexion est journalisee.#
+interface FastEthernet0/0
+ description VLAN 200 serveurs
+ ip address 10.13.200.40 255.255.255.0
+ no shutdown
+exit
+ip route 0.0.0.0 0.0.0.0 10.13.200.1
+telephony-service
+ max-ephones 20
+ max-dn 20
+ ip source-address 10.13.200.40 port 2000
+ auto assign 1 to 20
+ create cnf-files
+exit
+ephone-dn 1
+ number 1001
+ name Enseignant-RDC
+exit
+ephone-dn 2
+ number 1002
+ name Bureau-Telecom
+exit
+ephone-dn 3
+ number 1003
+ name Bureau-Reseaux
+exit
+ephone-dn 4
+ number 2001
+ name Digne-Enseignant
+exit
+ephone-dn 5
+ number 1000
+ name Accueil
+exit
+end
+write memory

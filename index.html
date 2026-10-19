@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CALANQ'NET — ingénierie réseaux &amp; systèmes</title>
+<meta name="description" content="CALANQ'NET, ESN marseillaise fictive : ingénierie réseaux et systèmes. Projet BUT3 R&amp;T — IUT de Luminy.">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Charte CALANQ'NET : les couleurs du logo, et elles seules. */
+:root{
+  --navy:#023B58; --turq:#07A59C; --corail:#ED5910; --calc:#EDE5D3; --white:#FFFFFF;
+  --yacine:var(--corail); --ouss:var(--turq);
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--white);color:var(--navy);font-family:var(--f-body);font-size:16px;line-height:1.6}
+a{color:var(--navy);text-decoration-color:var(--turq);text-decoration-thickness:2px;text-underline-offset:3px}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--corail);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);line-height:1.12;text-wrap:balance;margin:0}
+h2{font-size:clamp(1.7rem,3.2vw,2.4rem);font-weight:800;letter-spacing:-.01em}
+h3{font-size:1.12rem;font-weight:700}
+p{margin:0}
+.eyebrow{font-family:var(--f-mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--navy);font-weight:500}
+.lead{max-width:64ch}
+/* en-tête */
+header.top{position:sticky;top:0;z-index:5;background:var(--navy);color:var(--white)}
+header.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:10px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;color:var(--white);text-decoration:none;font-family:var(--f-display);font-weight:800;font-size:1.25rem;letter-spacing:-.01em}
+.brand img{width:42px;height:42px;display:block;border-radius:9px;box-shadow:0 0 0 1px var(--calc)}
+.brand b{color:var(--turq);font-weight:800}
+nav ul{display:flex;gap:4px 18px;list-style:none;margin:0;padding:0;flex-wrap:wrap}
+nav a{color:var(--calc);text-decoration:none;font-size:.92rem}
+nav a:hover{color:var(--white);text-decoration:underline;text-decoration-color:var(--corail)}
+/* héros */
+.hero{background:var(--navy);color:var(--white);padding-block:56px 44px;overflow:hidden}
+.hero .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center}
+.hero .eyebrow{color:var(--calc)}
+.hero h1{font-size:clamp(2.1rem,5.2vw,3.7rem);font-weight:800;letter-spacing:-.02em;margin-top:12px}
+.hero h1 span{color:var(--turq)}
+.hero p.lead{color:var(--calc);margin-top:18px;font-size:1.08rem}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
+.btn{display:inline-block;padding:11px 18px;border-radius:8px;font-weight:600;text-decoration:none;font-size:.95rem;border:2px solid transparent}
+.btn.primary{background:var(--calc);color:var(--navy);border-color:var(--calc)}
+.btn.primary:hover{background:var(--white)}
+.btn.ghost{border-color:var(--calc);color:var(--calc)}
+.btn.ghost:hover{border-color:var(--turq);color:var(--white)}
+.btn.dark{background:var(--navy);color:var(--white)}
+.btn.dark:hover{background:var(--turq)}
+.coupe{min-width:0}
+.coupe svg{width:100%;height:auto;display:block}
+.mnemo{margin-top:28px;font-family:var(--f-mono);font-size:.86rem;color:var(--calc);display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.mnemo code{border:1px solid var(--calc);color:var(--white);padding:3px 8px;border-radius:6px}
+/* chiffres */
+.figures{border-bottom:1px solid var(--calc)}
+.figures dl{display:grid;grid-template-columns:repeat(5,1fr);margin:0}
+.figures div{padding:22px 16px;border-left:1px solid var(--calc)}
+.figures div:first-child{border-left:0}
+.figures dt{font-size:.82rem}
+.figures dd{margin:2px 0 0;font-family:var(--f-display);font-weight:800;font-size:1.9rem;font-variant-numeric:tabular-nums}
+.figures dd small{font-size:.95rem;font-weight:600}
+section{padding-block:64px}
+section.alt{background:var(--calc)}
+.head{display:grid;gap:10px;margin-bottom:30px}
+/* valeurs */
+.values{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.value{background:var(--white);border:1px solid var(--navy);border-radius:10px;padding:18px;display:grid;gap:6px;align-content:start}
+.value .k{font-family:var(--f-mono);font-size:.75rem}
+.value p{font-size:.93rem}
+.engage{margin-top:26px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.engage div{display:grid;grid-template-columns:40px 1fr;gap:4px 12px;align-items:start}
+.engage .n{grid-row:span 2;width:40px;height:40px;border-radius:50%;background:var(--corail);color:var(--white);display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:1.1rem}
+.engage p{font-size:.93rem}
+/* projet */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.part{background:var(--white);border:1px solid var(--calc);border-radius:12px;overflow:hidden;min-width:0}
+.part > header{padding:16px 20px;color:var(--white);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.part > header h3{font-size:1.22rem}
+.part.y > header{background:var(--yacine)} .part.o > header{background:var(--ouss)}
+.part > header span{font-family:var(--f-mono);font-size:.82rem;font-weight:500}
+.part ul{list-style:none;margin:0;padding:6px 20px 16px}
+.part li{display:grid;grid-template-columns:52px 1fr;gap:10px;padding:11px 0;border-bottom:1px dashed var(--calc)}
+.part li:last-child{border-bottom:0}
+.part li .t{font-family:var(--f-mono);font-size:.8rem;padding-top:2px}
+.part li strong{display:block;font-size:.98rem}
+.part li p{font-size:.9rem}
+.tools{margin-top:22px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.tool{background:var(--white);border:1px solid var(--calc);border-radius:12px;padding:18px;display:grid;gap:8px;align-content:start}
+.tool .btn{justify-self:start;margin-top:4px}
+/* équipe */
+.team{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.person{background:var(--white);border:1px solid var(--calc);border-radius:12px;padding:22px;display:grid;grid-template-columns:64px 1fr;gap:16px;align-items:start}
+.avatar{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;color:var(--white);font-family:var(--f-display);font-weight:800;font-size:1.4rem}
+.person.y .avatar{background:var(--yacine)} .person.o .avatar{background:var(--ouss)}
+.person p{font-size:.93rem;margin-top:4px}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.tags span{font-family:var(--f-mono);font-size:.74rem;border:1px solid var(--navy);border-radius:999px;padding:2px 9px}
+/* journal */
+.journal{display:grid;grid-template-columns:.9fr 1.1fr;gap:28px;align-items:start}
+.timeline{list-style:none;margin:0;padding:0;border-left:2px solid var(--navy)}
+.timeline li{position:relative;padding:0 0 22px 22px}
+.timeline li::before{content:"";position:absolute;left:-8px;top:6px;width:14px;height:14px;border-radius:50%;background:var(--white);border:2px solid var(--navy)}
+.timeline li.done::before{background:var(--turq);border-color:var(--turq)}
+.timeline .when{font-family:var(--f-mono);font-size:.78rem}
+.timeline p{font-size:.92rem}
+.timeline a{font-weight:600}
+.progress{background:var(--white);border:1px solid var(--navy);border-radius:12px;overflow:hidden;min-width:0}
+.progress .scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+caption{text-align:left;padding:12px 12px 6px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--calc);vertical-align:middle}
+th{font-size:.76rem;text-transform:uppercase;letter-spacing:.06em;font-weight:600;background:var(--navy);color:var(--white)}
+td.num{font-variant-numeric:tabular-nums;font-family:var(--f-mono);white-space:nowrap}
+.bar{height:8px;background:var(--calc);border-radius:99px;min-width:90px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--turq);border-radius:99px}
+.who{font-family:var(--f-mono);font-size:.74rem;border-radius:999px;padding:1px 8px;white-space:nowrap;background:var(--white);border:1.5px solid var(--navy)}
+.who.y{border-color:var(--yacine)} .who.o{border-color:var(--ouss)}
+.planning-img{margin-top:28px;background:var(--white);border:1px solid var(--navy);border-radius:12px;padding:12px}
+.planning-img img{width:100%;height:auto;display:block}
+/* contact */
+.contact{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
+.card{background:var(--white);border:1px solid var(--calc);border-radius:12px;padding:22px}
+.card dl{display:grid;grid-template-columns:110px 1fr;gap:8px 12px;margin:0}
+.card dd{margin:0;font-family:var(--f-mono);font-size:.9rem;word-break:break-word}
+form{display:grid;gap:12px}
+label{font-size:.88rem;font-weight:600}
+input,textarea,select{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--navy);border-radius:8px;background:var(--white);color:var(--navy)}
+button{font:inherit;cursor:pointer}
+.ok{color:var(--navy);font-weight:600}
+footer{background:var(--navy);color:var(--calc);font-size:.88rem}
+footer .wrap{padding-block:26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+footer a{color:var(--white)}
+@media (max-width:920px){
+  .hero .wrap,.split,.team,.journal,.contact{grid-template-columns:1fr}
+  .values{grid-template-columns:repeat(2,1fr)} .engage,.tools{grid-template-columns:1fr}
+  .figures dl{grid-template-columns:repeat(3,1fr)} .figures div:nth-child(4){border-left:0}
+}
+@media (max-width:520px){
+  .values{grid-template-columns:1fr} .figures dl{grid-template-columns:repeat(2,1fr)}
+  .figures div{border-left:0;border-top:1px solid var(--calc)} .person{grid-template-columns:1fr}
+  nav ul{gap:4px 12px}
+  .who{white-space:normal;display:inline-block;line-height:1.35}.bar{min-width:56px}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#accueil" aria-label="CALANQ'NET, retour à l'accueil"><img src="assets/embleme-calanqnet.png" alt=""><span>CALANQ'<b>NET</b></span></a>
+    <nav aria-label="Navigation principale"><ul>
+      <li><a href="#approche">Approche</a></li><li><a href="#projet">Projet IUT Luminy</a></li>
+      <li><a href="#equipe">Équipe</a></li><li><a href="#journal">Journal de bord</a></li><li><a href="#contact">Contact</a></li>
+    </ul></nav>
+  </div>
+</header>
+
+<main id="accueil">
+  <div class="hero">
+    <div class="wrap">
+      <div>
+        <p class="eyebrow">ESN marseillaise · ingénierie réseaux &amp; systèmes</p>
+        <h1>Des réseaux solides comme la roche, <span>ouverts comme la mer.</span></h1>
+        <p class="lead">Nous concevons, chiffrons et maquettons l'infrastructure complète du département Réseaux &amp; Télécommunications de l'IUT de Luminy, avec son site jumeau de Digne-les-Bains : câblage, réseau, sécurité, datacenter, services et coûts.</p>
+        <div class="cta"><a class="btn primary" href="#projet">Voir le projet</a><a class="btn ghost" href="reservation/">Essayer Réserv'Salles</a></div>
+        <div class="mnemo" aria-label="Exemple de convention d'adressage">
+          <span>VLAN 50</span><span aria-hidden="true">→</span><code>10.13.50.0/24</code><span aria-hidden="true">→</span><code>2001:db8:13:50::/64</code>
+        </div>
+      </div>
+      <div class="coupe" aria-label="Coupe schématique du bâtiment : salle serveurs au sous-sol, sous-répartiteurs aux étages, rocades fibre doublées">
+        <svg viewBox="0 0 520 360" role="img">
+          <title>Coupe du bâtiment et rocades fibre</title>
+          <g font-family="IBM Plex Mono, monospace" font-size="12" fill="#EDE5D3">
+            <rect x="40" y="40" width="440" height="88" rx="6" fill="#023B58" stroke="#EDE5D3" stroke-width="1.2"/>
+            <rect x="40" y="136" width="440" height="88" rx="6" fill="#023B58" stroke="#EDE5D3" stroke-width="1.2"/>
+            <rect x="40" y="232" width="440" height="88" rx="6" fill="#023B58" stroke="#EDE5D3" stroke-width="1.2" stroke-dasharray="4 4"/>
+            <text x="260" y="62" text-anchor="middle">ÉTAGE 1 · 366 prises</text><text x="260" y="158" text-anchor="middle">RDC · 287 prises</text><text x="260" y="254" text-anchor="middle">SOUS-SOL · salle serveurs</text>
+            <path d="M260 286 C 200 286, 140 240, 120 196 L120 100" fill="none" stroke="#07A59C" stroke-width="5" stroke-linecap="round"/>
+            <path d="M260 286 C 330 286, 390 240, 400 196 L400 100" fill="none" stroke="#07A59C" stroke-width="5" stroke-linecap="round"/>
+            <path d="M268 280 C 268 230, 160 210, 136 186 L136 100" fill="none" stroke="#EDE5D3" stroke-width="5" stroke-dasharray="1 9" stroke-linecap="round"/>
+            <path d="M252 280 C 252 230, 370 210, 384 186 L384 100" fill="none" stroke="#EDE5D3" stroke-width="5" stroke-dasharray="1 9" stroke-linecap="round"/>
+            <g><rect x="96" y="80" width="64" height="30" rx="6" fill="#EDE5D3" stroke="#ED5910" stroke-width="2.5"/><text x="104" y="100" fill="#023B58" font-weight="500">SR 1-N</text></g>
+            <g><rect x="364" y="80" width="64" height="30" rx="6" fill="#EDE5D3" stroke="#ED5910" stroke-width="2.5"/><text x="372" y="100" fill="#023B58" font-weight="500">SR 1-S</text></g>
+            <g><rect x="96" y="176" width="64" height="30" rx="6" fill="#EDE5D3" stroke="#ED5910" stroke-width="2.5"/><text x="104" y="196" fill="#023B58" font-weight="500">SR R-N</text></g>
+            <g><rect x="364" y="176" width="64" height="30" rx="6" fill="#EDE5D3" stroke="#ED5910" stroke-width="2.5"/><text x="372" y="196" fill="#023B58" font-weight="500">SR R-S</text></g>
+            <g><rect x="214" y="270" width="92" height="34" rx="6" fill="#ED5910"/><text x="226" y="292" fill="#FFFFFF" font-weight="500">RG / DC</text></g>
+            <text x="480" y="344" text-anchor="end">rocades OS2 doublées : A (trait) · B (pointillé)</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="figures">
+    <div class="wrap">
+      <dl>
+        <div><dt>Prises Cat 6A certifiées</dt><dd>694</dd></div>
+        <div><dt>Bornes Wi-Fi 7</dt><dd>46</dd></div>
+        <div><dt>Sites interconnectés</dt><dd>2 <small>MPLS + IPsec</small></dd></div>
+        <div><dt>PUE cible du datacenter</dt><dd>1,4</dd></div>
+        <div><dt>Photovoltaïque en toiture</dt><dd>80 <small>kWc</small></dd></div>
+      </dl>
+    </div>
+  </div>
+
+  <section id="approche">
+    <div class="wrap">
+      <div class="head"><p class="eyebrow">Notre approche</p><h2>Cinq valeurs, trois engagements contractuels</h2>
+        <p class="lead">Nous travaillons pour des établissements publics. Nos choix doivent tenir quinze ans, coûter ce qui est annoncé et rester compréhensibles par les équipes qui les exploitent.</p></div>
+      <div class="values">
+        <div class="value"><span class="k">01 · solidité</span><h3>Redondance mesurée</h3><p>Deux chemins à chaque couche, des bascules testées et chronométrées en recette.</p></div>
+        <div class="value"><span class="k">02 · ouverture</span><h3>Logiciels libres</h3><p>Proxmox, Zabbix, FreeRADIUS, Nextcloud : aucun enfermement, environ 230 k€ économisés sur 5 ans.</p></div>
+        <div class="value"><span class="k">03 · sobriété</span><h3>Énergie maîtrisée</h3><p>Confinement, free-cooling, extinction programmée, 20 % de postes reconditionnés.</p></div>
+        <div class="value"><span class="k">04 · souveraineté</span><h3>Données en France</h3><p>Pare-feu qualifié par l'ANSSI, sauvegardes hors site souveraines, services RENATER.</p></div>
+        <div class="value"><span class="k">05 · pédagogie</span><h3>Un réseau qui enseigne</h3><p>Îlots de TP isolés, laboratoire virtuel, émargement numérique.</p></div>
+      </div>
+      <div class="engage">
+        <div><span class="n">1</span><h3>Zéro boîte noire</h3><p>Chaque configuration est produite depuis une source unique (plan d'adressage, inventaire) et remise au client.</p></div>
+        <div><span class="n">2</span><h3>Coût total transparent</h3><p>Investissement, fonctionnement, énergie et économies chiffrés ligne par ligne sur cinq ans.</p></div>
+        <div><span class="n">3</span><h3>Recette chiffrée</h3><p>Certification à 100 % du câblage, mesures Wi-Fi sur site, tests de bascule documentés.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="projet" class="alt">
+    <div class="wrap">
+      <div class="head"><p class="eyebrow">Projet IUT R&amp;T · Luminy &amp; Digne</p><h2>Une infrastructure complète, répartie en deux parties égales</h2>
+        <p class="lead">Chaque domaine a un responsable, choisi selon son profil d'alternance : la cybersécurité pour l'un, le data center pour l'autre. Chacun porte la moitié du projet.</p></div>
+      <div class="split">
+        <article class="part y">
+          <header><h3>Cybersécurité, interconnexions, services &amp; pilotage</h3><span>Partie de Yacine Ben Omrane</span></header>
+          <ul>
+            <li><span class="t">T1–2</span><div><strong>Pilotage et communication</strong><p>Journal de bord, identité de marque et ce site.</p></div></li>
+            <li><span class="t">T5</span><div><strong>Adressage IPv4 / IPv6</strong><p>Double pile native, le numéro de VLAN se lit dans l'adresse.</p></div></li>
+            <li><span class="t">T7–8</span><div><strong>WAN et Internet</strong><p>MPLS L3VPN vers Digne, secours IPsec, BGP RENATER + FAI avec RPKI.</p></div></li>
+            <li><span class="t">T9</span><div><strong>Sécurité</strong><p>Zones, 802.1X, bastion, SIEM Wazuh, pare-feu qualifié ANSSI.</p></div></li>
+            <li><span class="t">T10</span><div><strong>Wi-Fi 7</strong><p>eduroam en WPA3-Enterprise, invités, objets connectés.</p></div></li>
+            <li><span class="t">T12–13</span><div><strong>Voix, vidéo, applications</strong><p>FreePBX, BigBlueButton, réservation de salles et émargement.</p></div></li>
+            <li><span class="t">T19</span><div><strong>Juridique</strong><p>RGPD, données de connexion, vidéoprotection, charte informatique.</p></div></li>
+          </ul>
+        </article>
+        <article class="part o">
+          <header><h3>Datacenter, infrastructure &amp; exploitation</h3><span>Partie d'Oussama Madih</span></header>
+          <ul>
+            <li><span class="t">T3, T6</span><div><strong>Architecture 3 couches et LAN</strong><p>Cœur et distributions Catalyst 9500, accès Catalyst 9300, OSPF, HSRP.</p></div></li>
+            <li><span class="t">T4</span><div><strong>Câblage Cat 6A et rocades OS2</strong><p>694 prises, 4 sous-répartiteurs, lien le plus long à 76,6 m.</p></div></li>
+            <li><span class="t">T11</span><div><strong>Datacenter et systèmes</strong><p>Cluster Proxmox + Ceph à 3 nœuds, 27 VM, annuaire et SSO fédéré.</p></div></li>
+            <li><span class="t">T14</span><div><strong>Énergie et refroidissement</strong><p>Onduleur N+1, in-row, PUE 1,4, 112 MWh/an photovoltaïques.</p></div></li>
+            <li><span class="t">T15–16</span><div><strong>Sauvegarde et supervision</strong><p>Stratégie 3-2-1-1-0, LTO-9 hors ligne, Zabbix, NetBox, GLPI.</p></div></li>
+            <li><span class="t">T17–18</span><div><strong>Innovation et coûts</strong><p>Capteurs CO₂ LoRaWAN ; 1,61 M€ HT en tranche ferme, coût total sur 5 ans.</p></div></li>
+          </ul>
+        </article>
+      </div>
+      <div class="tools">
+        <div class="tool"><h3>Prototype Réserv'Salles</h3><p>Salles libres en temps réel, planning par salle, réservation sans conflit.</p><a class="btn dark" href="reservation/">Ouvrir le prototype</a></div>
+        <div class="tool"><h3>Journal de bord</h3><p>Bilans au format attendu / obtenu / écart, et synthèse d'avancement par topic.</p><a class="btn dark" href="#journal">Voir le journal</a></div>
+        <div class="tool"><h3>Code et configurations</h3><p>Sources du site, du prototype et configurations de la maquette Packet Tracer.</p><a class="btn dark" href="https://github.com/YaSs-Grvt/calanqnet">Dépôt GitHub</a></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="equipe">
+    <div class="wrap">
+      <div class="head"><p class="eyebrow">L'équipe</p><h2>Deux ingénieurs, deux domaines, un dossier</h2></div>
+      <div class="team">
+        <div class="person y"><div class="avatar" aria-hidden="true">YB</div><div><h3>Yacine Ben Omrane</h3><p>Alternant en cybersécurité. Chef de projet, responsable Cybersécurité, interconnexions &amp; services, et communication de la marque.</p>
+          <div class="tags"><span>Sécurité</span><span>802.1X</span><span>Pare-feu</span><span>BGP / RPKI</span><span>MPLS</span><span>Wi-Fi 7</span><span>ToIP</span><span>RGPD</span><span>Site web</span></div></div></div>
+        <div class="person o"><div class="avatar" aria-hidden="true">OM</div><div><h3>Oussama Madih</h3><p>Alternant en data center. Responsable Datacenter, infrastructure &amp; exploitation.</p>
+          <div class="tags"><span>Câblage</span><span>OSPF / HSRP</span><span>Proxmox</span><span>Énergie</span><span>Sauvegarde</span><span>Supervision</span><span>Chiffrage</span></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="journal" class="alt">
+    <div class="wrap">
+      <div class="head"><p class="eyebrow">Journal de bord</p><h2>Où en est le projet</h2>
+        <p class="lead">Le projet avance en cinq phases. Chacune se termine par un bilan publié ici.</p></div>
+      <div class="journal">
+        <ol class="timeline">
+          <li class="done"><span class="when">Phase 1</span><h3>Cadrage et analyse des plans</h3><p>Relevé des locaux sur les plans d'architecte, inventaire des besoins par salle, répartition des domaines.</p></li>
+          <li class="done"><span class="when">Phase 2 · JDB 1/3</span><h3>Conception détaillée</h3><p>21 dépôts rédigés, configurations de maquette, plans annotés et chiffrage. <a href="docs/JDB_1_sur_3.pdf">Lire le JDB 1/3 (PDF)</a></p></li>
+          <li><span class="when">Phase 3 · JDB 2/3</span><h3>Maquettage</h3><p>Packet Tracer (socle LAN et datacenter, puis périmètre, sécurité et services), maquette GNS3 du cœur MPLS, visite de site.</p></li>
+          <li><span class="when">Phase 4 · JDB 3/3</span><h3>Recette et ajustements</h3><p>Tests de bascule et de sécurité, devis fournisseurs, mise à jour du chiffrage.</p></li>
+          <li><span class="when">Phase 5 · JDB final</span><h3>Vidéo, rapport final, soutenance</h3><p>Vidéo en anglais, consolidation du rapport, répétitions.</p></li>
+        </ol>
+        <div class="progress">
+          <div class="scroll">
+            <table>
+              <caption class="eyebrow">Synthèse d'avancement par topic</caption>
+              <thead><tr><th>Topic</th><th>Responsable</th><th>Avancement</th><th></th></tr></thead>
+              <tbody id="avancement"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <figure class="planning-img" style="margin-left:0;margin-right:0"><img src="docs/planning_phases.png" alt="Planning par phases : cadrage, conception détaillée, maquettage, recette, rendu final et soutenance, avec les activités de chaque responsable et les jalons des journaux de bord"></figure>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="wrap">
+      <div class="head"><p class="eyebrow">Contact</p><h2>Parlons de votre infrastructure</h2></div>
+      <div class="contact">
+        <div class="card">
+          <dl>
+            <dt>Agence</dt><dd>Marseille 9e (adresse fictive)</dd>
+            <dt>Courriel</dt><dd>contact@calanqnet.fr (fictif)</dd>
+            <dt>Téléphone</dt><dd>04 00 00 00 00 (fictif)</dd>
+            <dt>Projet</dt><dd>BUT3 R&amp;T · IUT de Luminy</dd>
+          </dl>
+          <p style="margin-top:14px;font-size:.9rem">CALANQ'NET est une société fictive créée pour un projet pédagogique. Les adresses et numéros ci-dessus ne sont pas réels.</p>
+        </div>
+        <form id="f" novalidate>
+          <div><label for="nom">Nom</label><input id="nom" name="nom" autocomplete="name" placeholder="Votre nom"></div>
+          <div><label for="objet">Objet</label><select id="objet" name="objet"><option>Question sur le projet</option><option>Demande de devis</option><option>Retour de l'équipe pédagogique</option></select></div>
+          <div><label for="msg">Message</label><textarea id="msg" name="msg" rows="4" placeholder="Votre message"></textarea></div>
+          <button class="btn dark" type="submit" style="justify-self:start">Préparer le message</button>
+          <p id="fmsg" aria-live="polite"></p>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer><div class="wrap"><span>CALANQ'NET — société fictive, projet BUT3 R&amp;T (IUT de Luminy). Aucun cookie, aucun traceur.</span><span>Yacine Ben Omrane &amp; Oussama Madih · <a href="https://github.com/YaSs-Grvt/calanqnet">code source</a></span></div></footer>
+
+<script>
+const rows=[["T1 Gestion de projet & JDB","y",60],["T2 Communication & site web","y",90],["T3 Conception hiérarchique","o",80],["T4 Plan de câblage","o",90],
+["T5 Adressage IPv4 / IPv6","y",100],["T6 LAN","o",85],["T7 WAN","y",85],["T8 Internet & BGP","y",85],["T9 Sécurité","y",85],["T10 Sans fil","y",80],
+["T11 Systèmes & datacenter","o",90],["T12 Voix & vidéo","y",85],["T13 Logiciels","y",90],["T14 Énergie","o",95],["T15 Sauvegarde","o",95],
+["T16 Supervision","o",90],["T17 Innovation","o",95],["T18 Coûts","o",90],["T19 Juridique","y",95],["T20 Vidéo en anglais","c",30],["T21 Rendu final","c",70]];
+const tb=document.getElementById('avancement');
+tb.innerHTML=rows.map(([t,w,p])=>`<tr><td>${t}</td><td><span class="who ${w}">${w==='y'?'Yacine Ben Omrane':w==='o'?'Oussama Madih':'Commun'}</span></td><td><div class="bar" role="img" aria-label="${p} %"><i style="width:${p}%"></i></div></td><td class="num">${p} %</td></tr>`).join('');
+document.getElementById('f').addEventListener('submit',e=>{e.preventDefault();
+  const n=document.getElementById('nom').value.trim(), m=document.getElementById('msg').value.trim(), out=document.getElementById('fmsg');
+  if(!n||!m){out.textContent="Indiquez votre nom et votre message.";out.className='';return}
+  out.textContent="Message prêt. Ce site de démonstration n'envoie rien : copiez-le dans un courriel à l'équipe.";out.className='ok';});
+</script>
+</body>
+</html>

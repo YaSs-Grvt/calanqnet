@@ -1,0 +1,260 @@
+!==================================================================
+! CALANQ'NET - Maquette Packet Tracer - LUM-DIST-DC1
+! Role : Distribution bloc Datacenter n1 (Catalyst 9500-24Y4C en production / 3650-24PS en maquette)
+! Fichier genere depuis le plan d'adressage (source unique). Partie d'Oussama Madih (Topics 3 et 6, LAN et datacenter).
+! Copier-coller l'integralite du fichier dans le CLI de l'equipement.
+! Note PT : certaines lignes (ex. 'standby xxxx ipv6', 'storm-control') peuvent etre
+! refusees selon la version de Packet Tracer : ces refus sont sans incidence.
+!==================================================================
+enable
+configure terminal
+hostname LUM-DIST-DC1
+no ip domain-lookup
+ip domain-name iutrt.lan
+enable secret Ch@ngeMe-Lab!
+username admin privilege 15 secret Ch@ngeMe-Lab!
+service password-encryption
+banner motd #Acces reserve au personnel autorise - CALANQ'NET / IUT R&T Luminy. Toute connexion est journalisee.#
+ip routing
+ipv6 unicast-routing
+vtp mode transparent
+spanning-tree mode rapid-pvst
+vlan 100
+ name WIFI-EDUROAM
+vlan 104
+ name WIFI-INVITES
+vlan 108
+ name WIFI-IOT
+vlan 200
+ name SERVEURS
+vlan 230
+ name SAUVEGARDE
+vlan 250
+ name OOB-IPMI
+vlan 220
+ name STOCKAGE
+vlan 240
+ name CLUSTER
+vlan 998
+ name NATIVE
+vlan 999
+ name PARKING
+ipv6 dhcp pool LUM-V6-INFO
+ dns-server 2001:db8:13:200::10
+ domain-name iutrt.lan
+exit
+spanning-tree vlan 100,108,230 root primary
+spanning-tree vlan 104,200,250 root secondary
+interface Vlan100
+ description WIFI-EDUROAM - Wi-Fi authentifie 802.1X (etudiants, personnels)
+ ip address 10.13.100.2 255.255.252.0
+ standby version 2
+ standby 100 ip 10.13.100.1
+ standby 100 priority 110
+ standby 100 preempt
+ ip helper-address 10.13.200.12
+ ipv6 address 2001:db8:13:100::2/64
+ ipv6 enable
+ standby 1100 ipv6 autoconfig
+ standby 1100 priority 110
+ standby 1100 preempt
+ ipv6 nd other-config-flag
+ ipv6 dhcp server LUM-V6-INFO
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface Vlan104
+ description WIFI-INVITES - Wi-Fi invites (portail captif, Internet seul)
+ ip address 10.13.104.2 255.255.252.0
+ standby version 2
+ standby 104 ip 10.13.104.1
+ standby 104 priority 100
+ standby 104 preempt
+ ip helper-address 10.13.200.12
+ ipv6 address 2001:db8:13:104::2/64
+ ipv6 enable
+ standby 1104 ipv6 autoconfig
+ standby 1104 priority 100
+ standby 1104 preempt
+ ipv6 nd other-config-flag
+ ipv6 dhcp server LUM-V6-INFO
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface Vlan108
+ description WIFI-IOT - Objets connectes Wi-Fi (PSK par objet)
+ ip address 10.13.108.2 255.255.255.0
+ standby version 2
+ standby 108 ip 10.13.108.1
+ standby 108 priority 110
+ standby 108 preempt
+ ip helper-address 10.13.200.12
+ ipv6 address 2001:db8:13:108::2/64
+ ipv6 enable
+ standby 1108 ipv6 autoconfig
+ standby 1108 priority 110
+ standby 1108 preempt
+ ipv6 nd other-config-flag
+ ipv6 dhcp server LUM-V6-INFO
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface Vlan200
+ description SERVEURS - Serveurs internes (AD, DNS, DHCP, applis)
+ ip address 10.13.200.2 255.255.255.0
+ standby version 2
+ standby 200 ip 10.13.200.1
+ standby 200 priority 100
+ standby 200 preempt
+ ipv6 address 2001:db8:13:200::2/64
+ ipv6 enable
+ standby 1200 ipv6 autoconfig
+ standby 1200 priority 100
+ standby 1200 preempt
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface Vlan230
+ description SAUVEGARDE - Proxmox Backup Server, bibliotheque LTO
+ ip address 10.13.230.2 255.255.255.0
+ standby version 2
+ standby 230 ip 10.13.230.1
+ standby 230 priority 110
+ standby 230 preempt
+ ipv6 address 2001:db8:13:230::2/64
+ ipv6 enable
+ standby 1230 ipv6 autoconfig
+ standby 1230 priority 110
+ standby 1230 preempt
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface Vlan250
+ description OOB-IPMI - iDRAC, PDU, onduleurs, serveur de consoles
+ ip address 10.13.250.2 255.255.255.0
+ standby version 2
+ standby 250 ip 10.13.250.1
+ standby 250 priority 100
+ standby 250 preempt
+ ipv6 address 2001:db8:13:250::2/64
+ ipv6 enable
+ standby 1250 ipv6 autoconfig
+ standby 1250 priority 100
+ standby 1250 preempt
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface GigabitEthernet1/0/1
+ description Lien route vers LUM-CORE-01 Gi1/0/3
+ no switchport
+ ip address 10.13.254.18 255.255.255.252
+ ipv6 address 2001:db8:13:fe05::2/64
+ ipv6 enable
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface GigabitEthernet1/0/2
+ description Lien route vers LUM-CORE-02 Gi1/0/3
+ no switchport
+ ip address 10.13.254.26 255.255.255.252
+ ipv6 address 2001:db8:13:fe07::2/64
+ ipv6 enable
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface range GigabitEthernet1/0/3 - 4
+ description Inter-distribution DC vers LUM-DIST-DC2 (LACP)
+ switchport mode trunk
+ switchport trunk native vlan 998
+ switchport trunk allowed vlan 100,104,108,200,230,250,220,240
+ channel-group 1 mode active
+ no shutdown
+exit
+interface Port-channel1
+ switchport mode trunk
+ switchport trunk native vlan 998
+ switchport trunk allowed vlan 100,104,108,200,230,250,220,240
+exit
+interface GigabitEthernet1/0/10
+ description Serveur SRV-DNS
+ switchport mode access
+ switchport access vlan 200
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ no shutdown
+exit
+interface GigabitEthernet1/0/11
+ description Serveur SRV-DHCP
+ switchport mode access
+ switchport access vlan 200
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ no shutdown
+exit
+interface GigabitEthernet1/0/12
+ description Serveur SRV-AAA
+ switchport mode access
+ switchport access vlan 200
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ no shutdown
+exit
+interface GigabitEthernet1/0/13
+ description Serveur LUM-CME
+ switchport mode access
+ switchport access vlan 200
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ no shutdown
+exit
+interface GigabitEthernet1/0/20
+ description Controleur Wi-Fi WLC (trunk, VLAN natif 200 = interface de gestion WLC en maquette)
+ switchport mode trunk
+ switchport trunk native vlan 200
+ switchport trunk allowed vlan 100,104,108,200
+ no shutdown
+exit
+interface range GigabitEthernet1/0/15 - 19 , GigabitEthernet1/0/21 - 24 , GigabitEthernet1/0/5 - 9
+ description Port inutilise
+ switchport mode access
+ switchport access vlan 999
+ shutdown
+exit
+interface Loopback0
+ description Identifiant routeur / administration
+ ip address 10.13.255.5 255.255.255.255
+ ipv6 address 2001:db8:13:ffff::5/128
+ ipv6 ospf 1 area 0
+exit
+router ospf 1
+ router-id 10.13.255.5
+ log-adjacency-changes
+ network 10.13.0.0 0.0.255.255 area 0
+ passive-interface default
+ no passive-interface GigabitEthernet1/0/1
+ no passive-interface GigabitEthernet1/0/2
+exit
+ipv6 router ospf 1
+ router-id 10.13.255.5
+exit
+ipv6 router ospf 1
+ passive-interface default
+ no passive-interface GigabitEthernet1/0/1
+ no passive-interface GigabitEthernet1/0/2
+exit
+ip ssh version 2
+crypto key generate rsa general-keys modulus 2048
+line con 0
+ logging synchronous
+ exec-timeout 10 0
+line vty 0 15
+ login local
+ transport input ssh
+ exec-timeout 10 0
+exit
+ntp server 10.13.200.50
+logging host 10.13.200.50
+logging trap informational
+snmp-server community Cq-RO-Zabbix RO
+end
+write memory

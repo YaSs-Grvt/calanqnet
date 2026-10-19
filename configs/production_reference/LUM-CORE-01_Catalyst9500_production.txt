@@ -1,0 +1,70 @@
+! =====================================================================
+! CALANQ'NET - Configuration de reference PRODUCTION - LUM-CORE-01 (Catalyst 9500-24Y4C)
+! Partie d'Oussama Madih (Topic 3 / Topic 6)
+! =====================================================================
+hostname LUM-CORE-01
+ip routing
+ipv6 unicast-routing
+!
+key chain OSPF-KEYS
+ key 1
+  key-string <secret-ospf>
+  cryptographic-algorithm hmac-sha-256
+!
+interface Loopback0
+ ip address 10.13.255.1 255.255.255.255
+ ipv6 address 2001:DB8:13:FFFF::1/128
+ ospfv3 1 ipv4 area 0
+ ospfv3 1 ipv6 area 0
+!
+interface HundredGigE1/0/25
+ description vers LUM-DIST-B1
+ no switchport
+ ip address 10.13.254.1 255.255.255.252
+ ipv6 address 2001:DB8:13:FE01::1/64
+ ip ospf network point-to-point
+ ip ospf authentication key-chain OSPF-KEYS
+ ip ospf 1 area 0
+ ospfv3 1 network point-to-point
+ ospfv3 1 ipv6 area 0
+ bfd interval 300 min_rx 300 multiplier 3
+ ip flow monitor NF-MON input
+!
+router ospf 1
+ router-id 10.13.255.1
+ auto-cost reference-bandwidth 400000
+ passive-interface default
+ no passive-interface HundredGigE1/0/25
+ no passive-interface HundredGigE1/0/26
+ no passive-interface HundredGigE1/0/27
+ no passive-interface HundredGigE1/0/28
+ no passive-interface TwentyFiveGigE1/0/1
+ bfd all-interfaces
+ timers throttle spf 50 200 5000
+ default-information originate
+ maximum-paths 4
+!
+router ospfv3 1
+ address-family ipv6 unicast
+  router-id 10.13.255.1
+  passive-interface default
+  default-information originate
+  maximum-paths 4
+!
+flow record NF-REC
+ match ipv4 source address
+ match ipv4 destination address
+ match transport source-port
+ match transport destination-port
+ match ipv4 protocol
+ collect counter bytes long
+ collect counter packets long
+flow exporter NF-EXP
+ destination 10.13.200.60
+ transport udp 2055
+flow monitor NF-MON
+ record NF-REC
+ exporter NF-EXP
+!
+ip route 0.0.0.0 0.0.0.0 10.13.253.1 name VERS-PAREFEU
+ipv6 route ::/0 2001:DB8:13:FD00::1

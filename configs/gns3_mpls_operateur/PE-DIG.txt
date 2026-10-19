@@ -1,0 +1,35 @@
+hostname PE-DIG
+ip vrf IUT-RT
+ rd 64510:100
+ route-target export 64510:100
+ route-target import 64510:100
+mpls label protocol ldp
+interface Loopback0
+ ip address 10.255.255.3 255.255.255.255
+interface GigabitEthernet0/0
+ description PE-CE vers DIG-WAN-01 (AS 65004)
+ ip vrf forwarding IUT-RT
+ ip address 10.255.4.1 255.255.255.252
+ no shutdown
+interface GigabitEthernet0/1
+ ip address 10.255.0.6 255.255.255.252
+ mpls ip
+ no shutdown
+router ospf 100
+ router-id 10.255.255.3
+ network 10.255.0.4 0.0.0.3 area 0
+ network 10.255.255.3 0.0.0.0 area 0
+router bgp 64510
+ bgp router-id 10.255.255.3
+ no bgp default ipv4-unicast
+ neighbor 10.255.255.1 remote-as 64510
+ neighbor 10.255.255.1 update-source Loopback0
+ address-family vpnv4
+  neighbor 10.255.255.1 activate
+  neighbor 10.255.255.1 send-community extended
+ exit-address-family
+ address-family ipv4 vrf IUT-RT
+  neighbor 10.255.4.2 remote-as 65004
+  neighbor 10.255.4.2 activate
+ exit-address-family
+end

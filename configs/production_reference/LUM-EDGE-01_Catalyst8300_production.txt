@@ -1,0 +1,92 @@
+! =====================================================================
+! CALANQ'NET - Configuration de reference PRODUCTION - LUM-EDGE-01 (Catalyst 8300)
+! Politique BGP multi-domiciliee : RENATER principal / FAI-B secours
+! Partie de Yacine Ben Omrane (Topic 8). AS de documentation (RFC 5398), prefixes RFC 5737 / RFC 3849.
+! =====================================================================
+hostname LUM-EDGE-01
+ipv6 unicast-routing
+!
+! ---- Prefixes que NOUS annoncons (et rien d'autre) ----
+ip prefix-list PL-OUR-V4 seq 5 permit 203.0.113.0/24
+ipv6 prefix-list PL-OUR-V6 seq 5 permit 2001:DB8:13::/48
+! ---- Ce que nous acceptons : route par defaut + table partielle, sans bogons ----
+ip prefix-list PL-BOGONS seq 5 permit 0.0.0.0/8 le 32
+ip prefix-list PL-BOGONS seq 10 permit 10.0.0.0/8 le 32
+ip prefix-list PL-BOGONS seq 15 permit 100.64.0.0/10 le 32
+ip prefix-list PL-BOGONS seq 20 permit 127.0.0.0/8 le 32
+ip prefix-list PL-BOGONS seq 25 permit 169.254.0.0/16 le 32
+ip prefix-list PL-BOGONS seq 30 permit 172.16.0.0/12 le 32
+ip prefix-list PL-BOGONS seq 35 permit 192.168.0.0/16 le 32
+ip prefix-list PL-BOGONS seq 40 permit 224.0.0.0/3 le 32
+ip prefix-list PL-BOGONS seq 45 permit 203.0.113.0/24 le 32
+ip prefix-list PL-TOO-SPECIFIC seq 5 permit 0.0.0.0/0 ge 25
+!
+route-map RM-RENATER-IN deny 10
+ match ip address prefix-list PL-BOGONS
+route-map RM-RENATER-IN deny 15
+ match ip address prefix-list PL-TOO-SPECIFIC
+route-map RM-RENATER-IN deny 20
+ match rpki invalid
+route-map RM-RENATER-IN permit 100
+ set local-preference 200
+!
+route-map RM-RENATER-OUT permit 10
+ match ip address prefix-list PL-OUR-V4
+route-map RM-RENATER-OUT deny 100
+!
+route-map RM-RENATER-OUT-V6 permit 10
+ match ipv6 address prefix-list PL-OUR-V6
+route-map RM-RENATER-OUT-V6 deny 100
+!
+router bgp 64500
+ bgp router-id 10.13.255.11
+ bgp log-neighbor-changes
+ bgp rpki server tcp 10.13.200.65 port 3323 refresh 600
+ no bgp default ipv4-unicast
+ neighbor 192.0.2.1 remote-as 64501
+ neighbor 192.0.2.1 description RENATER (transit principal)
+ neighbor 192.0.2.1 password <md5-fourni-par-RENATER>
+ neighbor 192.0.2.1 ttl-security hops 1
+ neighbor 192.0.2.1 fall-over bfd
+ neighbor 2001:DB8:FFFF:1::1 remote-as 64501
+ neighbor 2001:DB8:FFFF:1::1 ttl-security hops 1
+ neighbor 10.13.255.12 remote-as 64500
+ neighbor 10.13.255.12 description iBGP LUM-EDGE-02
+ neighbor 10.13.255.12 update-source Loopback0
+ !
+ address-family ipv4
+  network 203.0.113.0 mask 255.255.255.0
+  neighbor 192.0.2.1 activate
+  neighbor 192.0.2.1 route-map RM-RENATER-IN in
+  neighbor 192.0.2.1 route-map RM-RENATER-OUT out
+  neighbor 192.0.2.1 maximum-prefix 1100000 90 restart 30
+  neighbor 192.0.2.1 soft-reconfiguration inbound
+  neighbor 10.13.255.12 activate
+  neighbor 10.13.255.12 next-hop-self
+ exit-address-family
+ address-family ipv6
+  network 2001:DB8:13::/48
+  neighbor 2001:DB8:FFFF:1::1 activate
+  neighbor 2001:DB8:FFFF:1::1 route-map RM-RENATER-OUT-V6 out
+  neighbor 2001:DB8:FFFF:1::1 maximum-prefix 250000 90
+ exit-address-family
+!
+ip route 203.0.113.0 255.255.255.0 Null0 254 name ANCRE-AGREGAT
+ipv6 route 2001:DB8:13::/48 Null0 254
+!
+! ---- Anti-usurpation (BCP 38) et protection du plan de controle ----
+interface TenGigabitEthernet0/1/0
+ description Transit RENATER
+ ip address 192.0.2.2 255.255.255.252
+ ip verify unicast source reachable-via rx
+ ipv6 verify unicast source reachable-via rx
+ no ip redirects
+ no ip proxy-arp
+ bfd interval 300 min_rx 300 multiplier 3
+!
+! ---- Sur LUM-EDGE-02 (FAI de secours), la difference est :
+! route-map RM-FAIB-IN permit 100
+!  set local-preference 100
+! route-map RM-FAIB-OUT permit 10
+!  match ip address prefix-list PL-OUR-V4
+!  set as-path prepend 64500 64500 64500

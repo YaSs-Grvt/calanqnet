@@ -1,0 +1,41 @@
+!==================================================================
+! CALANQ'NET - Complement SECURITE - LUM-ACC-RN - Partie de Yacine Ben Omrane
+! A coller APRES la configuration de base (Oussama Madih).
+!==================================================================
+enable
+configure terminal
+! --- AAA : authentification des administrateurs via RADIUS, repli local
+aaa new-model
+radius-server host 10.13.200.20 key R@dius-Maquette
+aaa authentication login default group radius local
+aaa authorization exec default group radius local
+line vty 0 15
+ login authentication default
+exit
+! --- DHCP snooping : seuls les uplinks sont de confiance
+ip dhcp snooping
+ip dhcp snooping vlan 30,40,60,90,98
+no ip dhcp snooping information option
+interface range GigabitEthernet0/1 - 2
+ ip dhcp snooping trust
+exit
+! --- Inspection ARP dynamique (s'appuie sur la table de snooping)
+ip arp inspection vlan 30,40
+interface range GigabitEthernet0/1 - 2
+ ip arp inspection trust
+exit
+! --- Securite de port sur les ports utilisateurs
+interface range FastEthernet0/1 - 5
+ switchport port-security
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky
+ switchport port-security violation restrict
+ ip dhcp snooping limit rate 15
+ storm-control broadcast level 5.00
+exit
+! --- Pas de CDP vers les postes utilisateurs (fuite d'information)
+interface range FastEthernet0/1 - 5
+ no cdp enable
+exit
+end
+write memory

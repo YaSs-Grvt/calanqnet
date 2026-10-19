@@ -1,0 +1,46 @@
+!==================================================================
+! CALANQ'NET - Maquette Packet Tracer - INTERNET
+! Role : Simulation de l'Internet (AS 64503) + serveurs de test
+! Fichier genere depuis le plan d'adressage (source unique). Partie de Yacine Ben Omrane (Topics 7, 8 et 9, WAN, Internet et perimetre).
+! Copier-coller l'integralite du fichier dans le CLI de l'equipement.
+! Note PT : certaines lignes (ex. 'standby xxxx ipv6', 'storm-control') peuvent etre
+! refusees selon la version de Packet Tracer : ces refus sont sans incidence.
+!==================================================================
+enable
+configure terminal
+hostname INTERNET
+no ip domain-lookup
+ip domain-name iutrt.lan
+enable secret Ch@ngeMe-Lab!
+username admin privilege 15 secret Ch@ngeMe-Lab!
+service password-encryption
+banner motd #Acces reserve au personnel autorise - CALANQ'NET / IUT R&T Luminy. Toute connexion est journalisee.#
+ipv6 unicast-routing
+interface GigabitEthernet0/0/0
+ description Vers RENATER-SIM
+ ip address 192.0.2.10 255.255.255.252
+ ipv6 address 2001:db8:ffff:3::2/64
+ no shutdown
+exit
+interface GigabitEthernet0/0/1
+ description Vers FAI-B
+ ip address 198.51.100.6 255.255.255.252
+ ipv6 address 2001:db8:ffff:4::2/64
+ no shutdown
+exit
+interface GigabitEthernet0/0/2
+ description LAN serveurs de test (web, DNS)
+ ip address 198.51.100.193 255.255.255.192
+ ipv6 address 2001:db8:ffff:100::1/64
+ no shutdown
+exit
+router bgp 64503
+ bgp router-id 198.51.100.193
+ neighbor 192.0.2.9 remote-as 64501
+ neighbor 198.51.100.5 remote-as 64502
+ network 198.51.100.192 mask 255.255.255.192
+exit
+ipv6 route 2001:db8:13::/48 2001:db8:ffff:3::1
+ipv6 route 2001:db8:4::/48 2001:db8:ffff:3::1
+end
+write memory

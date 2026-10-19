@@ -1,0 +1,170 @@
+! =====================================================================
+! CALANQ'NET - Configuration de reference PRODUCTION (Catalyst 9300, IOS XE 17.x)
+! Pile LUM-ACC-1S (SR Etage 1 Sud) - extrait representatif
+! Base reseau : Partie d'Oussama Madih (Topic 6) / Controle d'acces 802.1X : Partie de Yacine Ben Omrane (Topic 9)
+! =====================================================================
+hostname LUM-ACC-1S
+vtp mode transparent
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+spanning-tree portfast edge bpduguard default
+errdisable recovery cause bpduguard
+errdisable recovery interval 600
+!
+vlan 20
+ name ENSEIGNANTS
+vlan 30
+ name PEDAGOGIE
+vlan 32
+ name LAB-RESEAUX
+vlan 34
+ name TP-ELECTRO
+vlan 50
+ name VOIX
+vlan 98
+ name AP-CAPWAP
+vlan 99
+ name MGMT-RESEAU
+vlan 300-349
+ name TP-ILOTS
+vlan 999
+ name PARKING
+!
+! ---------- AAA / RADIUS (FreeRADIUS x2) ----------
+aaa new-model
+radius server RAD01
+ address ipv4 10.13.200.20 auth-port 1812 acct-port 1813
+ key 0 <cle-radius-a-definir>
+radius server RAD02
+ address ipv4 10.13.200.21 auth-port 1812 acct-port 1813
+ key 0 <cle-radius-a-definir>
+aaa group server radius RAD-IUT
+ server name RAD01
+ server name RAD02
+ ip radius source-interface Vlan99
+aaa authentication dot1x default group RAD-IUT
+aaa authorization network default group RAD-IUT
+aaa accounting dot1x default start-stop group RAD-IUT
+aaa authentication login default group RAD-IUT local
+aaa server radius dynamic-author
+ client 10.13.200.20 server-key 0 <cle-coa>
+ client 10.13.200.21 server-key 0 <cle-coa>
+dot1x system-auth-control
+radius-server dead-criteria time 5 tries 3
+radius-server deadtime 10
+!
+! ---------- Securite de premier saut IPv4 / IPv6 ----------
+device-tracking policy DT-ACCESS
+ tracking enable
+ip dhcp snooping
+ip dhcp snooping vlan 20,30,32,34,50
+no ip dhcp snooping information option
+ip arp inspection vlan 20,30,32,34
+ip arp inspection validate src-mac dst-mac ip
+ipv6 nd raguard policy RA-HOST
+ device-role host
+ipv6 dhcp guard policy DHCP6-CLIENT
+ device-role client
+!
+! ---------- QoS (marquage voix EF / signalisation CS3) ----------
+auto qos srnd4
+!
+! ---------- Modeles de ports ----------
+template PORT-USER-VOICE
+ description Poste + telephone (802.1X puis MAB)
+ switchport access vlan 20
+ switchport mode access
+ switchport voice vlan 50
+ switchport port-security maximum 3
+ switchport port-security violation restrict
+ storm-control broadcast level 5.00
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ access-session host-mode multi-domain
+ access-session closed
+ access-session port-control auto
+ mab
+ dot1x pae authenticator
+ dot1x timeout tx-period 7
+ service-policy type control subscriber DOT1X-MAB
+ ip dhcp snooping limit rate 15
+!
+template PORT-AP
+ description Borne Wi-Fi 7 (mGig 10G, UPOE)
+ switchport access vlan 98
+ switchport mode access
+ power inline port maximum 60000
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+policy-map type control subscriber DOT1X-MAB
+ event session-started match-all
+  10 class always do-until-failure
+   10 authenticate using dot1x priority 10
+ event authentication-failure match-first
+  10 class AAA-DOWN do-until-failure
+   10 activate service-template CRITICAL-VLAN
+   20 authorize
+  20 class DOT1X-FAILED do-until-failure
+   10 terminate dot1x
+   20 authenticate using mab priority 20
+  40 class always do-until-failure
+   10 terminate dot1x
+   20 terminate mab
+   30 authentication-restart 60
+ event agent-found match-all
+  10 class always do-until-failure
+   10 terminate mab
+   20 authenticate using dot1x priority 10
+!
+service-template CRITICAL-VLAN
+ vlan 30
+class-map type control subscriber match-all AAA-DOWN
+ match result-type aaa-timeout
+class-map type control subscriber match-all DOT1X-FAILED
+ match method dot1x
+ match result-type method dot1x authoritative
+!
+interface range GigabitEthernet1/0/1 - 48 , GigabitEthernet2/0/1 - 48
+ source template PORT-USER-VOICE
+ device-tracking attach-policy DT-ACCESS
+ ipv6 nd raguard attach-policy RA-HOST
+ ipv6 dhcp guard attach-policy DHCP6-CLIENT
+interface range TenGigabitEthernet7/0/1 - 13
+ source template PORT-AP
+!
+! ---------- Uplinks : 2 x 10G vers chaque distribution (fibre OS2) ----------
+interface range TenGigabitEthernet1/1/1 , TenGigabitEthernet7/1/1
+ description Uplink LUM-DIST-B1 (rocade A)
+ channel-group 1 mode active
+interface range TenGigabitEthernet1/1/2 , TenGigabitEthernet7/1/2
+ description Uplink LUM-DIST-B2 (rocade B)
+ channel-group 2 mode active
+interface range Port-channel1 - 2
+ switchport mode trunk
+ switchport trunk native vlan 998
+ switchport trunk allowed vlan 20,30,32,34,50,98,99
+ ip dhcp snooping trust
+ ip arp inspection trust
+!
+interface Vlan99
+ ip address 10.13.99.14 255.255.255.0
+ip default-gateway 10.13.99.1
+!
+! ---------- Administration ----------
+ip ssh version 2
+ip ssh time-out 60
+ip access-list standard ACL-MGMT
+ permit 10.13.10.0 0.0.0.255
+ permit 10.13.200.0 0.0.0.255
+line vty 0 15
+ access-class ACL-MGMT in
+ transport input ssh
+snmp-server group ZBX v3 priv read RO-VIEW
+snmp-server view RO-VIEW iso included
+snmp-server user zabbix ZBX v3 auth sha <auth> priv aes 128 <priv>
+ntp server 10.13.200.50 key 1
+logging host 10.13.200.50
+archive
+ path flash:archive
+ write-memory

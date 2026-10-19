@@ -1,0 +1,17 @@
+hostname P-CORE
+mpls label protocol ldp
+interface Loopback0
+ ip address 10.255.255.2 255.255.255.255
+interface GigabitEthernet0/1
+ ip address 10.255.0.2 255.255.255.252
+ mpls ip
+ no shutdown
+interface GigabitEthernet0/2
+ ip address 10.255.0.5 255.255.255.252
+ mpls ip
+ no shutdown
+router ospf 100
+ router-id 10.255.255.2
+ network 10.255.0.0 0.0.0.7 area 0
+ network 10.255.255.2 0.0.0.0 area 0
+end

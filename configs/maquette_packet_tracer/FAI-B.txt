@@ -1,0 +1,39 @@
+!==================================================================
+! CALANQ'NET - Maquette Packet Tracer - FAI-B
+! Role : Simulation FAI de secours (AS 64502)
+! Fichier genere depuis le plan d'adressage (source unique). Partie de Yacine Ben Omrane (Topics 7, 8 et 9, WAN, Internet et perimetre).
+! Copier-coller l'integralite du fichier dans le CLI de l'equipement.
+! Note PT : certaines lignes (ex. 'standby xxxx ipv6', 'storm-control') peuvent etre
+! refusees selon la version de Packet Tracer : ces refus sont sans incidence.
+!==================================================================
+enable
+configure terminal
+hostname FAI-B
+no ip domain-lookup
+ip domain-name iutrt.lan
+enable secret Ch@ngeMe-Lab!
+username admin privilege 15 secret Ch@ngeMe-Lab!
+service password-encryption
+banner motd #Acces reserve au personnel autorise - CALANQ'NET / IUT R&T Luminy. Toute connexion est journalisee.#
+ipv6 unicast-routing
+interface GigabitEthernet0/0/0
+ description Vers LUM-EDGE-02
+ ip address 198.51.100.1 255.255.255.252
+ ipv6 address 2001:db8:ffff:2::1/64
+ no shutdown
+exit
+interface GigabitEthernet0/0/1
+ description Vers INTERNET
+ ip address 198.51.100.5 255.255.255.252
+ ipv6 address 2001:db8:ffff:4::1/64
+ no shutdown
+exit
+router bgp 64502
+ bgp router-id 198.51.100.5
+ neighbor 198.51.100.2 remote-as 64500
+ neighbor 198.51.100.6 remote-as 64503
+exit
+ipv6 route 2001:db8:13::/48 2001:db8:ffff:2::2
+ipv6 route ::/0 2001:db8:ffff:4::2
+end
+write memory

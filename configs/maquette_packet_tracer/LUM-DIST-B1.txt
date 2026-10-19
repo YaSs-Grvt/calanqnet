@@ -1,0 +1,415 @@
+!==================================================================
+! CALANQ'NET - Maquette Packet Tracer - LUM-DIST-B1
+! Role : Distribution bloc Batiment n1 (Catalyst 9500-24Y4C en production / 3650-24PS en maquette)
+! Fichier genere depuis le plan d'adressage (source unique). Partie d'Oussama Madih (Topics 3 et 6, LAN et datacenter).
+! Copier-coller l'integralite du fichier dans le CLI de l'equipement.
+! Note PT : certaines lignes (ex. 'standby xxxx ipv6', 'storm-control') peuvent etre
+! refusees selon la version de Packet Tracer : ces refus sont sans incidence.
+!==================================================================
+enable
+configure terminal
+hostname LUM-DIST-B1
+no ip domain-lookup
+ip domain-name iutrt.lan
+enable secret Ch@ngeMe-Lab!
+username admin privilege 15 secret Ch@ngeMe-Lab!
+service password-encryption
+banner motd #Acces reserve au personnel autorise - CALANQ'NET / IUT R&T Luminy. Toute connexion est journalisee.#
+ip routing
+ipv6 unicast-routing
+vtp mode transparent
+spanning-tree mode rapid-pvst
+vlan 10
+ name ADMINISTRATION
+vlan 20
+ name ENSEIGNANTS
+vlan 30
+ name PEDAGOGIE
+vlan 32
+ name LAB-RESEAUX
+vlan 34
+ name TP-ELECTRO
+vlan 40
+ name ETUDIANTS-FIL
+vlan 50
+ name VOIX
+vlan 60
+ name VIDEOPROTECTION
+vlan 70
+ name GTB-ACCES
+vlan 80
+ name IMPRESSION
+vlan 90
+ name AUDIOVISUEL
+vlan 98
+ name AP-CAPWAP
+vlan 99
+ name MGMT-RESEAU
+vlan 120
+ name LOGEMENT
+vlan 998
+ name NATIVE
+vlan 999
+ name PARKING
+ipv6 dhcp pool LUM-V6-INFO
+ dns-server 2001:db8:13:200::10
+ domain-name iutrt.lan
+exit
+spanning-tree vlan 10,30,34,50,70,90,99 root primary
+spanning-tree vlan 20,32,40,60,80,98,120 root secondary
+interface Vlan10
+ description ADMINISTRATION - Secretariat, direction, gestion
+ ip address 10.13.10.2 255.255.255.0
+ standby version 2
+ standby 10 ip 10.13.10.1
+ standby 10 priority 110
+ standby 10 preempt
+ ip helper-address 10.13.200.12
+ ipv6 address 2001:db8:13:10::2/64
+ ipv6 enable
+ standby 1010 ipv6 autoconfig
+ standby 1010 priority 110
+ standby 1010 preempt
+ ipv6 nd other-config-flag
+ ipv6 dhcp server LUM-V6-INFO
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface Vlan20
+ description ENSEIGNANTS - Bureaux enseignants / personnels
+ ip address 10.13.20.2 255.255.255.0
+ standby version 2
+ standby 20 ip 10.13.20.1
+ standby 20 priority 100
+ standby 20 preempt
+ ip helper-address 10.13.200.12
+ ipv6 address 2001:db8:13:20::2/64
+ ipv6 enable
+ standby 1020 ipv6 autoconfig
+ standby 1020 priority 100
+ standby 1020 preempt
+ ipv6 nd other-config-flag
+ ipv6 dhcp server LUM-V6-INFO
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface Vlan30
+ description PEDAGOGIE - Salles informatiques, labo de langues, salles TD
+ ip address 10.13.30.2 255.255.254.0
+ standby version 2
+ standby 30 ip 10.13.30.1
+ standby 30 priority 110
+ standby 30 preempt
+ ip helper-address 10.13.200.12
+ ipv6 address 2001:db8:13:30::2/64
+ ipv6 enable
+ standby 1030 ipv6 autoconfig
+ standby 1030 priority 110
+ standby 1030 preempt
+ ipv6 nd other-config-flag
+ ipv6 dhcp server LUM-V6-INFO
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface Vlan32
+ description LAB-RESEAUX - Postes des salles TP reseaux / telecom
+ ip address 10.13.32.2 255.255.255.0
+ standby version 2
+ standby 32 ip 10.13.32.1
+ standby 32 priority 100
+ standby 32 preempt
+ ip helper-address 10.13.200.12
+ ipv6 address 2001:db8:13:32::2/64
+ ipv6 enable
+ standby 1032 ipv6 autoconfig
+ standby 1032 priority 100
+ standby 1032 preempt
+ ipv6 nd other-config-flag
+ ipv6 dhcp server LUM-V6-INFO
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface Vlan34
+ description TP-ELECTRO - Salles electronique, TP, preparation
+ ip address 10.13.34.2 255.255.255.0
+ standby version 2
+ standby 34 ip 10.13.34.1
+ standby 34 priority 110
+ standby 34 preempt
+ ip helper-address 10.13.200.12
+ ipv6 address 2001:db8:13:34::2/64
+ ipv6 enable
+ standby 1034 ipv6 autoconfig
+ standby 1034 priority 110
+ standby 1034 preempt
+ ipv6 nd other-config-flag
+ ipv6 dhcp server LUM-V6-INFO
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface Vlan40
+ description ETUDIANTS-FIL - Prises etudiants (salles projet, foyer, clubs)
+ ip address 10.13.40.2 255.255.255.0
+ standby version 2
+ standby 40 ip 10.13.40.1
+ standby 40 priority 100
+ standby 40 preempt
+ ip helper-address 10.13.200.12
+ ipv6 address 2001:db8:13:40::2/64
+ ipv6 enable
+ standby 1040 ipv6 autoconfig
+ standby 1040 priority 100
+ standby 1040 preempt
+ ipv6 nd other-config-flag
+ ipv6 dhcp server LUM-V6-INFO
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface Vlan50
+ description VOIX - Telephones IP (ToIP)
+ ip address 10.13.50.2 255.255.255.0
+ standby version 2
+ standby 50 ip 10.13.50.1
+ standby 50 priority 110
+ standby 50 preempt
+ ip helper-address 10.13.200.12
+ ipv6 address 2001:db8:13:50::2/64
+ ipv6 enable
+ standby 1050 ipv6 autoconfig
+ standby 1050 priority 110
+ standby 1050 preempt
+ ipv6 nd other-config-flag
+ ipv6 dhcp server LUM-V6-INFO
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface Vlan60
+ description VIDEOPROTECTION - Cameras IP + enregistreur (NVR)
+ ip address 10.13.60.2 255.255.255.0
+ standby version 2
+ standby 60 ip 10.13.60.1
+ standby 60 priority 100
+ standby 60 preempt
+ ipv6 address 2001:db8:13:60::2/64
+ ipv6 enable
+ standby 1060 ipv6 autoconfig
+ standby 1060 priority 100
+ standby 1060 preempt
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface Vlan70
+ description GTB-ACCES - Controle d'acces, GTB, capteurs, bornes IRVE
+ ip address 10.13.70.2 255.255.255.0
+ standby version 2
+ standby 70 ip 10.13.70.1
+ standby 70 priority 110
+ standby 70 preempt
+ ip helper-address 10.13.200.12
+ ipv6 address 2001:db8:13:70::2/64
+ ipv6 enable
+ standby 1070 ipv6 autoconfig
+ standby 1070 priority 110
+ standby 1070 preempt
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface Vlan80
+ description IMPRESSION - Copieurs et imprimantes
+ ip address 10.13.80.2 255.255.255.0
+ standby version 2
+ standby 80 ip 10.13.80.1
+ standby 80 priority 100
+ standby 80 preempt
+ ip helper-address 10.13.200.12
+ ipv6 address 2001:db8:13:80::2/64
+ ipv6 enable
+ standby 1080 ipv6 autoconfig
+ standby 1080 priority 100
+ standby 1080 preempt
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface Vlan90
+ description AUDIOVISUEL - Videoprojecteurs, ecrans, visio, captation amphi
+ ip address 10.13.90.2 255.255.255.0
+ standby version 2
+ standby 90 ip 10.13.90.1
+ standby 90 priority 110
+ standby 90 preempt
+ ip helper-address 10.13.200.12
+ ipv6 address 2001:db8:13:90::2/64
+ ipv6 enable
+ standby 1090 ipv6 autoconfig
+ standby 1090 priority 110
+ standby 1090 preempt
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface Vlan98
+ description AP-CAPWAP - Bornes Wi-Fi (tunnel CAPWAP vers le controleur)
+ ip address 10.13.98.2 255.255.255.0
+ standby version 2
+ standby 98 ip 10.13.98.1
+ standby 98 priority 100
+ standby 98 preempt
+ ip helper-address 10.13.200.12
+ ipv6 address 2001:db8:13:98::2/64
+ ipv6 enable
+ standby 1098 ipv6 autoconfig
+ standby 1098 priority 100
+ standby 1098 preempt
+ ipv6 nd other-config-flag
+ ipv6 dhcp server LUM-V6-INFO
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface Vlan99
+ description MGMT-RESEAU - Administration des equipements reseau
+ ip address 10.13.99.2 255.255.255.0
+ standby version 2
+ standby 99 ip 10.13.99.1
+ standby 99 priority 110
+ standby 99 preempt
+ ipv6 address 2001:db8:13:99::2/64
+ ipv6 enable
+ standby 1099 ipv6 autoconfig
+ standby 1099 priority 110
+ standby 1099 preempt
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface Vlan120
+ description LOGEMENT - Logement de fonction (Internet seul, isole)
+ ip address 10.13.120.2 255.255.255.240
+ standby version 2
+ standby 120 ip 10.13.120.1
+ standby 120 priority 100
+ standby 120 preempt
+ ip helper-address 10.13.200.12
+ ipv6 address 2001:db8:13:120::2/64
+ ipv6 enable
+ standby 1120 ipv6 autoconfig
+ standby 1120 priority 100
+ standby 1120 preempt
+ ipv6 nd other-config-flag
+ ipv6 dhcp server LUM-V6-INFO
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface GigabitEthernet1/0/1
+ description Lien route vers LUM-CORE-01 Gi1/0/1
+ no switchport
+ ip address 10.13.254.2 255.255.255.252
+ ipv6 address 2001:db8:13:fe01::2/64
+ ipv6 enable
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface GigabitEthernet1/0/2
+ description Lien route vers LUM-CORE-02 Gi1/0/1
+ no switchport
+ ip address 10.13.254.10 255.255.255.252
+ ipv6 address 2001:db8:13:fe03::2/64
+ ipv6 enable
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface range GigabitEthernet1/0/3 - 4
+ description Inter-distribution vers LUM-DIST-B2 (LACP)
+ switchport mode trunk
+ switchport trunk native vlan 998
+ switchport trunk allowed vlan 10,20,30,32,34,40,50,60,70,80,90,98,99,120
+ channel-group 1 mode active
+ no shutdown
+exit
+interface Port-channel1
+ description Inter-distribution vers LUM-DIST-B2
+ switchport mode trunk
+ switchport trunk native vlan 998
+ switchport trunk allowed vlan 10,20,30,32,34,40,50,60,70,80,90,98,99,120
+exit
+interface GigabitEthernet1/0/10
+ description Trunk vers LUM-ACC-RN - SR RDC Nord (L.TECH)
+ switchport mode trunk
+ switchport trunk native vlan 998
+ switchport trunk allowed vlan 10,20,30,32,34,40,50,60,70,80,90,98,99,120
+ switchport nonegotiate
+ no shutdown
+exit
+interface GigabitEthernet1/0/11
+ description Trunk vers LUM-ACC-RS - SR RDC Sud (L.TECH 02)
+ switchport mode trunk
+ switchport trunk native vlan 998
+ switchport trunk allowed vlan 10,20,30,32,34,40,50,60,70,80,90,98,99,120
+ switchport nonegotiate
+ no shutdown
+exit
+interface GigabitEthernet1/0/12
+ description Trunk vers LUM-ACC-1N - SR Etage 1 Nord (L.TECH 01)
+ switchport mode trunk
+ switchport trunk native vlan 998
+ switchport trunk allowed vlan 10,20,30,32,34,40,50,60,70,80,90,98,99,120
+ switchport nonegotiate
+ no shutdown
+exit
+interface GigabitEthernet1/0/13
+ description Trunk vers LUM-ACC-1S - SR Etage 1 Sud (L.TECH 02)
+ switchport mode trunk
+ switchport trunk native vlan 998
+ switchport trunk allowed vlan 10,20,30,32,34,40,50,60,70,80,90,98,99,120
+ switchport nonegotiate
+ no shutdown
+exit
+interface GigabitEthernet1/0/14
+ description Trunk vers LUM-ACC-SS - Sous-sol (baie R04 salle serveurs)
+ switchport mode trunk
+ switchport trunk native vlan 998
+ switchport trunk allowed vlan 10,20,30,32,34,40,50,60,70,80,90,98,99,120
+ switchport nonegotiate
+ no shutdown
+exit
+interface range GigabitEthernet1/0/15 - 24 , GigabitEthernet1/0/5 - 9
+ description Port inutilise
+ switchport mode access
+ switchport access vlan 999
+ shutdown
+exit
+interface Loopback0
+ description Identifiant routeur / administration
+ ip address 10.13.255.3 255.255.255.255
+ ipv6 address 2001:db8:13:ffff::3/128
+ ipv6 ospf 1 area 0
+exit
+router ospf 1
+ router-id 10.13.255.3
+ log-adjacency-changes
+ network 10.13.0.0 0.0.255.255 area 0
+ passive-interface default
+ no passive-interface GigabitEthernet1/0/1
+ no passive-interface GigabitEthernet1/0/2
+exit
+ipv6 router ospf 1
+ router-id 10.13.255.3
+exit
+ipv6 router ospf 1
+ passive-interface default
+ no passive-interface GigabitEthernet1/0/1
+ no passive-interface GigabitEthernet1/0/2
+exit
+ip ssh version 2
+crypto key generate rsa general-keys modulus 2048
+line con 0
+ logging synchronous
+ exec-timeout 10 0
+line vty 0 15
+ login local
+ transport input ssh
+ exec-timeout 10 0
+exit
+ntp server 10.13.200.50
+logging host 10.13.200.50
+logging trap informational
+snmp-server community Cq-RO-Zabbix RO
+end
+write memory

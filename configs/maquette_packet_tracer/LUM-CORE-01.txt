@@ -1,0 +1,148 @@
+!==================================================================
+! CALANQ'NET - Maquette Packet Tracer - LUM-CORE-01
+! Role : Cur de reseau n1 (Catalyst 9500-24Y4C en production / 3650-24PS en maquette)
+! Fichier genere depuis le plan d'adressage (source unique). Partie d'Oussama Madih (Topics 3 et 6, LAN et datacenter).
+! Copier-coller l'integralite du fichier dans le CLI de l'equipement.
+! Note PT : certaines lignes (ex. 'standby xxxx ipv6', 'storm-control') peuvent etre
+! refusees selon la version de Packet Tracer : ces refus sont sans incidence.
+!==================================================================
+enable
+configure terminal
+hostname LUM-CORE-01
+no ip domain-lookup
+ip domain-name iutrt.lan
+enable secret Ch@ngeMe-Lab!
+username admin privilege 15 secret Ch@ngeMe-Lab!
+service password-encryption
+banner motd #Acces reserve au personnel autorise - CALANQ'NET / IUT R&T Luminy. Toute connexion est journalisee.#
+ip routing
+ipv6 unicast-routing
+vtp mode transparent
+spanning-tree mode rapid-pvst
+vlan 900
+ name TRANSIT-FW
+vlan 998
+ name NATIVE
+vlan 999
+ name PARKING
+interface GigabitEthernet1/0/1
+ description Lien route vers LUM-DIST-B1 Gi1/0/1
+ no switchport
+ ip address 10.13.254.1 255.255.255.252
+ ipv6 address 2001:db8:13:fe01::1/64
+ ipv6 enable
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface GigabitEthernet1/0/2
+ description Lien route vers LUM-DIST-B2 Gi1/0/1
+ no switchport
+ ip address 10.13.254.5 255.255.255.252
+ ipv6 address 2001:db8:13:fe02::1/64
+ ipv6 enable
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface GigabitEthernet1/0/3
+ description Lien route vers LUM-DIST-DC1 Gi1/0/1
+ no switchport
+ ip address 10.13.254.17 255.255.255.252
+ ipv6 address 2001:db8:13:fe05::1/64
+ ipv6 enable
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface GigabitEthernet1/0/4
+ description Lien route vers LUM-DIST-DC2 Gi1/0/1
+ no switchport
+ ip address 10.13.254.21 255.255.255.252
+ ipv6 address 2001:db8:13:fe06::1/64
+ ipv6 enable
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface GigabitEthernet1/0/5
+ description Lien route vers LUM-CORE-02 Gi1/0/5
+ no switchport
+ ip address 10.13.254.33 255.255.255.252
+ ipv6 address 2001:db8:13:fe09::1/64
+ ipv6 enable
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface GigabitEthernet1/0/7
+ description Lien route vers LUM-WAN-01 Gi0/0/1
+ no switchport
+ ip address 10.13.254.37 255.255.255.252
+ ipv6 address 2001:db8:13:fe10::1/64
+ ipv6 enable
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+interface GigabitEthernet1/0/6
+ description Trunk transit pare-feu vers LUM-CORE-02
+ switchport mode trunk
+ switchport trunk native vlan 998
+ switchport trunk allowed vlan 900
+ no shutdown
+exit
+interface GigabitEthernet1/0/8
+ description Pare-feu LUM-FW-01 interface inside
+ switchport mode access
+ switchport access vlan 900
+ spanning-tree portfast
+ no shutdown
+exit
+interface Vlan900
+ description Transit vers pare-feu (inside)
+ ip address 10.13.253.2 255.255.255.248
+ standby version 2
+ standby 900 ip 10.13.253.4
+ standby 900 priority 110
+ standby 900 preempt
+ ipv6 address 2001:db8:13:fd00::2/64
+ no shutdown
+exit
+ip route 0.0.0.0 0.0.0.0 10.13.253.1
+ipv6 route ::/0 2001:db8:13:fd00::1
+interface range GigabitEthernet1/0/9 - 24
+ description Port inutilise
+ switchport mode access
+ switchport access vlan 999
+ shutdown
+exit
+interface Loopback0
+ description Identifiant routeur / administration
+ ip address 10.13.255.1 255.255.255.255
+ ipv6 address 2001:db8:13:ffff::1/128
+ ipv6 ospf 1 area 0
+exit
+router ospf 1
+ router-id 10.13.255.1
+ log-adjacency-changes
+ network 10.13.0.0 0.0.255.255 area 0
+ passive-interface Vlan900
+ default-information originate
+exit
+ipv6 router ospf 1
+ router-id 10.13.255.1
+exit
+ipv6 router ospf 1
+ default-information originate
+exit
+ip ssh version 2
+crypto key generate rsa general-keys modulus 2048
+line con 0
+ logging synchronous
+ exec-timeout 10 0
+line vty 0 15
+ login local
+ transport input ssh
+ exec-timeout 10 0
+exit
+ntp server 10.13.200.50
+logging host 10.13.200.50
+logging trap informational
+snmp-server community Cq-RO-Zabbix RO
+end
+write memory
