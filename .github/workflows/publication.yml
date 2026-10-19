@@ -1,0 +1,21 @@
+name: Publication du site
+
+# Chaque modification de la branche main est recopiée sur gh-pages,
+# la branche publiée par GitHub Pages.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Mettre à jour gh-pages
+        run: git push --force origin HEAD:refs/heads/gh-pages
